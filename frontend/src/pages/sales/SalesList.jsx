@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 
 export default function SalesList() {
-  const [sales, setS ales] = useState([])
+  const [sales, setSales] = useState([])
   const [loading, setLoading] = useState(true)
   const [dateRange, setDateRange] = useState({
     startDate: new Date(new Date().setDate(1)).toISOString().split('T')[0],
