@@ -129,9 +129,44 @@ const addTenantToQuery = function (tenantId) {
   };
 };
 
+/**
+ * Middleware to check if a specific feature is enabled for the tenant
+ * Usage: router.use(checkFeature(FEATURES.BRANCHES))
+ */
+const checkFeature = (featureName) => {
+  return async (req, res, next) => {
+    try {
+      // Skip for super admin
+      if (req.user && req.user.role === USER_ROLES.SUPER_ADMIN) {
+        return next();
+      }
+
+      // Ensure tenant is loaded (should be set by validateTenantStatus)
+      if (!req.tenant) {
+        return next(new AppError('Tenant information not found', 500));
+      }
+
+      // Check if feature is enabled
+      if (!req.tenant.hasFeature(featureName)) {
+        return next(
+          new AppError(
+            `This feature (${featureName}) is not available in your current subscription plan. Please upgrade to access this feature.`,
+            403
+          )
+        );
+      }
+
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+};
+
 module.exports = {
   tenantFilter,
   extractTenantFromSubdomain,
   validateTenantStatus,
   addTenantToQuery,
+  checkFeature,
 };
